@@ -1,9 +1,43 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
+import { blog_data } from '../../assets/assets';
+import BlogTableItem from '../../components/admin/BlogTableitem';
 
 const ListBlog = () => {
+
+  const [blogs, setBlogs] = useState([]);
+
+  const fetchBlogs = async () => {
+    setBlogs(blog_data);
+  }
+
+  useEffect(()=>{
+    fetchBlogs();
+  }, [])
+
+
   return (
-    <div>
+    <div className='flex-1 pt-5 px-5 sm:pt-12 sm:pl-16 bg-blue-50/50'>
+      <h1>All Blogs</h1>
       
+
+      <div className="relative h-4/5 max-w-4xl mt-4 overflow-x-auto shadow rounded-lg scrollbar-hide bg-white">
+          <table className="w-full text-sm text-gray-500">
+            <thead className="text-xs text-gray-600 text-left uppercase"> 
+              <tr>
+                <th scope='col' className="py-4 px-2 xl:px-6">#</th>
+                <th scope='col' className="py-4 px-2">Blog Title</th>
+                <th scope='col' className="py-4 px-2 max-sm:hidden">Date</th>
+                <th scope='col' className="py-4 px-2 max-sm:hidden">Status</th>
+                <th scope='col' className="py-4 px-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {blogs.map((blog, index) => {
+                return <BlogTableItem key={index} blog={blog} fetchBlogs={fetchBlogs} index={index + 1} />
+              })}
+            </tbody>
+          </table>
+        </div>
     </div>
   )
 }
