@@ -7,12 +7,12 @@ const blogRouter = express.Router();
 
 
 blogRouter.post('/add', upload.single('image'), auth, addBlog);
-blogRouter.get('/all', auth, getAllBlogs);
-blogRouter.get('/:blogId', auth, getBlogById);
-blogRouter.delete('/:delete', auth, deleteBlogById);
-blogRouter.post('/toggle-publish', auth, togglePublish);
+blogRouter.get('/all', getAllBlogs);
+blogRouter.get('/:blogId', getBlogById);
+blogRouter.delete('/delete', auth, deleteBlogById);
+blogRouter.put('/toggle-publish', auth, togglePublish);
 
-blogRouter.post('/add-comment', auth, addComment);
-blogRouter.get('/comments', auth, getBlogComments);
+blogRouter.post('/add-comment', addComment);
+blogRouter.get('/comments/:blogId', getBlogComments);
 
 export default blogRouter;

@@ -55,7 +55,7 @@ export const getDashboard = async (req, res) => {
             drafts
         };
 
-        res.json({ success: true, DashboardData });
+        res.json({ success: true, dashboard: DashboardData });
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
         res.status(500).json({ success: false, message: error.message });

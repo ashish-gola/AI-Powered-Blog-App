@@ -6,9 +6,13 @@ import Moment from 'moment';
 import Footer from '../components/Footer';
 import Loader from '../components/Loader';
 import { motion } from 'framer-motion'
+import { useAppContext } from '../context/AppContext';
+import toast from 'react-hot-toast';
 
 const Blog = () => {
     const {id} = useParams();
+
+    const {axios} = useAppContext();
 
 
     const [data, setData] = useState(null);
@@ -18,16 +22,46 @@ const Blog = () => {
     const [content, setContent] = useState('');
 
     const fetchBlogData = async () => {
-       const blogPost = blog_data.find(blog => blog._id === id);
-       setData(blogPost);
+       try {
+           const { data } = await axios.get(`/api/blog/${id}`);
+           if (data.success) {
+               setData(data.blog);
+           } else {
+               toast.error(data.message);
+           }
+       } catch (error) {
+           toast.error(error.response?.data?.message || 'Failed to fetch blog');
+       }
     }
 
     const fetchComments = async () => {
-       setComments(comments_data);
+      try {
+        const { data } = await axios.get(`/api/blog/comments/${id}`);
+        if (data.success) {
+            setComments(data.comments);
+        } else {
+            toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to fetch comments');
+      }
     }
-
-    const addComment = (e) => {
-       e.preventDefault(); 
+    
+    const addComment = async (e) => {
+       e.preventDefault();
+       try {
+           const { data } = await axios.post(`/api/blog/add-comment`, { blogId: id, name, content });
+           if (data.success) {
+            toast.success(data.message || 'Comment added successfully');
+            setName('');
+            setContent('');
+            fetchComments(); // Refresh comments after adding
+           } else {
+            toast.error(data.message);
+           }
+       } catch (error) {
+           toast.error(error.response?.data?.message || 'Failed to add comment');
+       }
     }
 
     useEffect(() => {
@@ -62,8 +96,8 @@ const Blog = () => {
         <div className='mt-14 mb-10 max-w-3xl mx-auto'>
             <p className='font-semibold mb-4'>Comments ({comments.length})</p>
             <div className='flex flex-col gap-4'>
-                {comments.map((item, index)=>(
-                    <div key={index} className='relative bg-primary/2 border border-primary/5 rounded p-4 max-w-xl text-gray-600'>
+                {comments.length > 0 ? comments.map((item, index)=>(
+                    <div key={index} className='relative bg-primary/5 border border-primary/20 rounded p-4 max-w-xl text-gray-600'>
                         <div className='flex items-center gap-2 mb-2'>
                             <img src={assets.user_icon} alt='User Icon' className='w-6' />
                             <p className='font-medium'>{item.name}</p>
@@ -71,8 +105,9 @@ const Blog = () => {
                         <p className='text-sm max-w-md ml-8'>{item.content}</p>
                         <div className='absolute right-4 bottom-3 flex items-center gap-2 text-xs'>{Moment(item.createdAt).fromNow()}</div>
                     </div>
-                ))}
-
+                )) : (
+                    <p className='text-gray-500 text-sm'>No comments yet. Be the first to comment!</p>
+                )}
             </div>
         </div>
 
@@ -81,7 +116,7 @@ const Blog = () => {
             <form onSubmit={addComment} className='flex flex-col items-start gap-4 max-w-lg'>
                 <input onChange={(e) => setName(e.target.value)} value={name} type='text' placeholder='Your Name' required className='w-full p-2 border border-gray-300 rounded outline-none' />
                 <textarea onChange={(e) => setContent(e.target.value)} value={content} placeholder='Your Comment' required className='w-full border border-gray-300 p-2 rounded outline-none h-48'></textarea>
-                <button type='submit' className='bg-primary text-white p-2 px-8 rounded hover:scale-102 transition-all cursor-pointer'>Submit</button>
+                <button type='submit' className='bg-primary text-white p-2 px-8 rounded hover:scale-105 transition-all cursor-pointer'>Submit</button>
             </form>
         </div>
 
