@@ -4,11 +4,13 @@ import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import { parse } from 'marked';
 
 const AddBlog = () => {
 
   const { axios } = useAppContext();
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
@@ -20,8 +22,24 @@ const AddBlog = () => {
   const [isPublished, setIsPublished] = useState(false);
 
   const generateContent = async () => {
-    
+    if(!title) return toast.error('Please enter a blog title to generate content');
+
+    try {
+      setLoading(true);
+      const { data } = await axios.post('/api/blog/generate', { prompt: title });
+      if (data.success) {
+        quillRef.current.root.innerHTML = parse(data.content);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Remove this incomplete onSubmitHandler function
 
   const onSubmitHandler = async (e) => {
     try {
@@ -72,7 +90,7 @@ const AddBlog = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.message);
     } finally {
       setIsAdding(false);
     }
@@ -149,7 +167,7 @@ const AddBlog = () => {
         <p className='mt-6 font-medium mb-2'>Sub Title</p>
         <input 
           type='text' 
-          placeholder='Enter blog subtitle (optional)' 
+          placeholder='Enter blog subtitle (optional)'  
           value={subTitle} 
           onChange={(e) => setSubTitle(e.target.value)}
           className='border border-gray-300 outline-none max-w-lg mt-2 p-3 w-full rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all' 
@@ -158,7 +176,13 @@ const AddBlog = () => {
         <p className='mt-6 font-medium mb-2'>Blog Description *</p>
         <div className='max-w-lg h-80 pb-16 sm:pb-10 pt-2 relative'>
           <div ref={editorRef} className='h-64 border border-gray-300 rounded-lg focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all'></div>
+          {loading && (
+            <div className='absolute right-0 top-0 bottom-0 left-0 bg-black/10 mt-2 flex items-center justify-center'>
+              <div className='w-8 h-8 rounded-full border-2 border-t-white animate-spin'></div>
+            </div>
+          )}
           <button 
+            disabled={loading}
             type='button' 
             onClick={generateContent} 
             className='absolute bottom-1 right-2 ml-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:bg-black/80 transition-colors cursor-pointer'

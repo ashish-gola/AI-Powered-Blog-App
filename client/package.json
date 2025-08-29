@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.12",
     "axios": "^1.11.0",
     "framer-motion": "^12.23.12",
+    "marked": "^16.2.1",
     "moment": "^2.30.1",
     "quill": "^2.0.3",
     "react": "^19.1.1",

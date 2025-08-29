@@ -1,5 +1,5 @@
 import express from 'express';
-import { addBlog, addComment, deleteBlogById, getAllBlogs, getBlogById, getBlogComments, togglePublish } from '../controllers/blogController.js';
+import { addBlog, addComment, deleteBlogById, generateContent, getAllBlogs, getBlogById, getBlogComments, togglePublish } from '../controllers/blogController.js';
 import upload from '../middleware/multer.js';
 import auth from '../middleware/auth.js';
 
@@ -14,5 +14,8 @@ blogRouter.put('/toggle-publish', auth, togglePublish);
 
 blogRouter.post('/add-comment', addComment);
 blogRouter.get('/comments/:blogId', getBlogComments);
+
+// AI content generation route
+blogRouter.post('/generate', auth, generateContent);
 
 export default blogRouter;
